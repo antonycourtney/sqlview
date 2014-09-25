@@ -1,5 +1,14 @@
+.query-log-entry {
+    padding-left: 10px;
+    padding-bottom: 25px;    
+}
+
 .sql-query {
     font-size: 10pt;
+}
+
+.sql-query pre {
+    margin-top: 0px;
 }
 
 body {
@@ -10,4 +19,11 @@ body {
 .gridHolder {
     width: 1100px;
     height: 400px;
+}
+
+.history-index {
+    text-align: right;
+    vertical-align: top;
+    font-weight: bold;
+    font-size: 12pt;
 }
