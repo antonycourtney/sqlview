@@ -36,6 +36,9 @@ var QueryLogViewer = React.createClass(
                     <td className="history-index">{"[" + i + "]: "}</td>
                     <td className="query-log-entry">
                         <SqlQuery query={entry.query} />
+                        <p>
+                        Rows Returned: {gridData.length}
+                        </p>
                         <DataGrid columnNames={columnNames} data={gridData} options={gridOptions} />
                     </td>
                 </tr>
