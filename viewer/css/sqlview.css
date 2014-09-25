@@ -1,0 +1,13 @@
+.sql-query {
+    font-size: 10pt;
+}
+
+body {
+  margin: 30px;
+  margin-top: 8px;
+}
+
+.gridHolder {
+    width: 1100px;
+    height: 400px;
+}
