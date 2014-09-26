@@ -20,6 +20,10 @@
     margin-left: 10px;
 }
 
+.sql-exception {
+    font-weight: bold;
+}
+
 body {
   margin: 10px;
   margin-top: 8px;

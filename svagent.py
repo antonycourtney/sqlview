@@ -12,6 +12,7 @@ import os
 import sys
 from flask.json import JSONEncoder
 import datetime
+import traceback
 
 #
 # A custom JSONEncoder to encode date (not datetime) values reasonably:
@@ -65,38 +66,24 @@ def runQuery(source,query):
     entry = { 'source': source, 'query': query, 'result': []}
     try:
         cursor.execute(query)
+        desc = cursor.description
+        # print "description: ", desc
+        cnames = map(lambda d: d.name, desc)
+        # print "column names: ", cnames
+        rows = cursor.fetchall()
+        # print "===> ", rows
+        entry['status'] = True
+        entry['result'] = { 'columnNames': cnames, 'data': rows }
     except:
         dbConn = None
         cursor = None
-        raise
-    desc = cursor.description
-    print "description: ", desc
-    cnames = map(lambda d: d.name, desc)
-    print "column names: ", cnames
-    rows = cursor.fetchall()
-    print "===> ", rows
-    entry['result'] = { 'columnNames': cnames, 'data': rows }
+        entry['status'] = False
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+        exceptionInfo = ''.join(lines)
+        print "caught exception: ", exceptionInfo
+        entry['exceptionInfo'] = exceptionInfo
     queryLog.append(entry)
-
-
-RETRYMAX = 3
-RETRYSLEEP = 30
-# A version of runQuery that will retry after a timeout if query
-# fails for some reason:
-def safeRunQuery(source,query):
-    def doIt():
-        runQuery(source,query)
-    done = False
-    retryCount = 0
-    while not done and retryCount < RETRYMAX:
-        try:
-            retryCount += 1
-            doIt()
-            done=True
-        except:
-            print "Unexpected exception executing query:", sys.exc_info()[0]
-            print "\n\n(Will retry in ", RETRYSLEEP, " seconds...)"
-            Timer( RETRYSLEEP, doIt, ()).start()
 
 @app.route("/runsql",methods=['POST'])
 def runsql():
@@ -105,7 +92,7 @@ def runsql():
     sql = request.form['query']
     source = request.form['source']
     print "got query: ", sql
-    safeRunQuery(source,sql)
+    runQuery(source,sql)
     return "OK"
 
 @app.route("/getHistory/<int:history_id>")

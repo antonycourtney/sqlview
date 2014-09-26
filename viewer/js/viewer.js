@@ -24,23 +24,38 @@ var QueryLogViewer = React.createClass(
         };
     },
     
+    renderQueryResult: function(entry) {
+        var ret;
+        if (entry.status) {
+            var columnNames = entry.result.columnNames;
+            var gridData = entry.result.data;        
+            ret= (<div>
+                        <p>
+                        Rows Returned: {gridData.length}
+                        </p>
+                        <DataGrid columnNames={columnNames} data={gridData} options={gridOptions} />                
+                   </div>);
+        } else {
+            ret = (<div>
+                <p className="sql-exception">Exception evaluating query:</p>
+                <pre className="sql-exception">{entry.exceptionInfo}</pre>
+                </div>);
+        }
+        return ret;
+    },
+
     render: function() {
         var rows = [];
         var queryLog = this.state.queryLog;
         for (var i = 0; i < queryLog.length; i++) {
             var entry = queryLog[i];
-            var columnNames = entry.result.columnNames;
-            var gridData = entry.result.data;        
             rows.push(
                 <tr key={i} className="query-log-row">
                     <td className="history-index">{"[" + i + "]: "}</td>
                     <td className="query-log-entry">
                         <span className="query-source">{entry.source}:</span>
                         <SqlQuery query={entry.query} />
-                        <p>
-                        Rows Returned: {gridData.length}
-                        </p>
-                        <DataGrid columnNames={columnNames} data={gridData} options={gridOptions} />
+                        {this.renderQueryResult(entry)}
                     </td>
                 </tr>
             );
@@ -82,9 +97,9 @@ function fetchHistory() {
     }));
 
     hp.then(function (data) {
-        // console.log("Got additional history: ", data);
         if (data.history.length > 0) {
             var newLog = currentLog.concat(data.history);
+            console.log("Got additional history: ", data);
             console.log("logViewer: ", logViewer );
             logViewer.setState({ queryLog: newLog } );
             console.log("Set state on log viewer...");
