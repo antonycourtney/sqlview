@@ -30,8 +30,6 @@ awspassword=getPass()
 
 dbConn = None
 
-print "after setting dbConn: ", dbConn
-
 # log of queries and results
 queryLog = []
 
@@ -68,7 +66,7 @@ RETRYSLEEP = 30
 # fails for some reason:
 def safeRunQuery(source,query):
     def doIt():
-        runQuery(query)
+        runQuery(source,query)
     done = False
     retryCount = 0
     while not done and retryCount < RETRYMAX:

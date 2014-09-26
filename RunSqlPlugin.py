@@ -23,13 +23,15 @@ def send_query(source,query):
 
 class RunSqlCommand(sublime_plugin.TextCommand):
     def run(self, edit):
+        filename="(unnamed buffer)"        
         try:
             # need this in a try/catch because Sublime seems to choke on unnamed buffers
-            filename = self.view.file_name()
-            if filename!=None:
-                print("file name: ", os.path.basename(filename))
+            viewFilename = self.view.file_name()
+            if viewFilename!=None:
+                filename = os.path.basename(viewFilename)
+                print("file name: ", filename)
         except:
-            filename="(unnamed buffer)"
+            pass
         selectedText = ""
         for r in self.view.sel():
             selectedText += self.view.substr(r)
@@ -44,5 +46,5 @@ class RunSqlCommand(sublime_plugin.TextCommand):
         else:
             queryText = selectedText
             source = "selected text from " + filename
-        send_query(queryText)
+        send_query(source,queryText)
         # self.view.insert(edit, 0, "Hello, World!")

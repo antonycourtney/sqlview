@@ -16,7 +16,8 @@
 }
 
 .sql-query pre {
-    margin-top: 0px;
+    margin-top: 5px;
+    margin-left: 10px;
 }
 
 body {
@@ -35,3 +36,7 @@ body {
     font-weight: bold;
     font-size: 10pt;
 }
+.query-source {
+    font-weight: bold;
+}
+

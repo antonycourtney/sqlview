@@ -35,7 +35,7 @@ var QueryLogViewer = React.createClass(
                 <tr key={i} className="query-log-row">
                     <td className="history-index">{"[" + i + "]: "}</td>
                     <td className="query-log-entry">
-                        <h3>{entry.source}</h3>
+                        <span className="query-source">{entry.source}:</span>
                         <SqlQuery query={entry.query} />
                         <p>
                         Rows Returned: {gridData.length}
@@ -65,21 +65,34 @@ var logViewer = React.renderComponent(
     document.getElementById("content")
 );
 
-var historyId = 0;
-var historyUrl = "/getHistory/" + historyId;
-var hp = Q($.ajax({
-    url: historyUrl,
-    type: "GET"
-}));
 
-hp.then(function (data) {
-    console.log("Got history: ", data);
-    console.log("logViewer: ", logViewer );
-    logViewer.setState({ queryLog: data.history } );
-    console.log("Set state on log viewer...");
-    window.scrollTo(0,document.body.scrollHeight);    
-}).catch(function (e) {
-    console.error("caught unhandled promise exception: ", e.stack, e);
-});
+/*
+ * fetch and update query log
+ */
+function fetchHistory() {
 
+    var currentLog = logViewer.state.queryLog;
 
+    var historyId = currentLog.length;
+    var historyUrl = "/getHistory/" + historyId;
+    // console.log("fetching history from ", historyUrl);
+    var hp = Q($.ajax({
+        url: historyUrl,
+        type: "GET"
+    }));
+
+    hp.then(function (data) {
+        // console.log("Got additional history: ", data);
+        if (data.history.length > 0) {
+            var newLog = currentLog.concat(data.history);
+            console.log("logViewer: ", logViewer );
+            logViewer.setState({ queryLog: newLog } );
+            console.log("Set state on log viewer...");
+            window.scrollTo(0,document.body.scrollHeight);    
+        }
+    }).catch(function (e) {
+        console.error("caught unhandled promise exception: ", e.stack, e);
+    });
+}
+
+window.setInterval(fetchHistory,1000);
