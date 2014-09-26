@@ -10,8 +10,27 @@ import psycopg2
 import getpass
 import os
 import sys
+from flask.json import JSONEncoder
+import datetime
+
+#
+# A custom JSONEncoder to encode date (not datetime) values reasonably:
+#
+class CustomJSONEncoder(JSONEncoder):
+    def default(self, obj):
+        try:
+            if isinstance(obj, datetime.date):
+                ret = obj.strftime("%d %b %Y")
+                return ret
+            iterable = iter(obj)
+        except TypeError:
+            pass
+        else:
+            return list(iterable)
+        return JSONEncoder.default(self, obj)
 
 app = Flask(__name__)
+app.json_encoder = CustomJSONEncoder
 
 PASSFILE = "~/.awspass"
 
