@@ -67,10 +67,15 @@ def runQuery(source,query):
     try:
         cursor.execute(query)
         desc = cursor.description
-        # print "description: ", desc
-        cnames = map(lambda d: d.name, desc)
+        print "description: ", desc
+        cnames = []
+        if desc != None:
+            cnames = map(lambda d: d.name, desc)
         # print "column names: ", cnames
-        rows = cursor.fetchall()
+        try:
+            rows = cursor.fetchall()
+        except psycopg2.ProgrammingError:
+            rows = []
         # print "===> ", rows
         entry['status'] = True
         entry['result'] = { 'columnNames': cnames, 'data': rows }
