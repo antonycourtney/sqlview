@@ -10,3 +10,6 @@ The project is broken in to three components:
 * *viewer* -- The collection of HTML and JavaScript that runs in the browser to show queries and results.
 * *client* -- A command-line client that opens an http connection to the agent, submits a SQL query to execute, and immediately exits.  Does not return query results to the client, but instead makes submitted query and result available to the web-based viewer. Could probably be implemented entirely with wget or curl.
 
+# Installation and Getting Started
+
+To install the Sublime Text plugin, copy or link RunSqlPlugin.py in to the Sublime Text plugins directory.  For me, this is ~//Library/Application Support/Sublime Text 3/Packages/User.

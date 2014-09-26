@@ -4,10 +4,12 @@
 from flask import Flask
 from flask import request
 from flask import jsonify
+from threading import Timer
 import flask
 import psycopg2
 import getpass
 import os
+import sys
 
 app = Flask(__name__)
 
@@ -26,18 +28,30 @@ def getPass():
 
 awspassword=getPass()
 
-print "Connecting to db..."
-dbconn = psycopg2.connect(host="my-redshift.ch3bwpy21rao.us-west-2.redshift.amazonaws.com",
-                        database="mydb",port="5439",user="awsuser",password=awspassword)
-cursor = dbconn.cursor()
+dbConn = None
+
+print "after setting dbConn: ", dbConn
 
 # log of queries and results
 queryLog = []
 
-def runQuery(query):
+def runQuery(source,query):
+    global dbConn
+    print "dbConn: ", dbConn
+    if dbConn==None:
+        print "Connecting to database:"
+        dbConn = psycopg2.connect(host="my-redshift.ch3bwpy21rao.us-west-2.redshift.amazonaws.com",
+                                    database="mydb",port="5439",user="awsuser",password=awspassword)
+        print "Connected."
+    cursor = dbConn.cursor()
     print "Executing query: ", query
-    entry = {'query': query, 'result': []}
-    cursor.execute(query)
+    entry = { 'source': source, 'query': query, 'result': []}
+    try:
+        cursor.execute(query)
+    except:
+        dbConn = None
+        cursor = None
+        raise
     desc = cursor.description
     print "description: ", desc
     cnames = map(lambda d: d.name, desc)
@@ -47,13 +61,34 @@ def runQuery(query):
     entry['result'] = { 'columnNames': cnames, 'data': rows }
     queryLog.append(entry)
 
+
+RETRYMAX = 3
+RETRYSLEEP = 30
+# A version of runQuery that will retry after a timeout if query
+# fails for some reason:
+def safeRunQuery(source,query):
+    def doIt():
+        runQuery(query)
+    done = False
+    retryCount = 0
+    while not done and retryCount < RETRYMAX:
+        try:
+            retryCount += 1
+            doIt()
+            done=True
+        except:
+            print "Unexpected exception executing query:", sys.exc_info()[0]
+            print "\n\n(Will retry in ", RETRYSLEEP, " seconds...)"
+            Timer( RETRYSLEEP, doIt, ()).start()
+
 @app.route("/runsql",methods=['POST'])
 def runsql():
     print "got query request"
     print "request form data: ", request.form
     sql = request.form['query']
+    source = request.form['source']
     print "got query: ", sql
-    runQuery(sql)
+    safeRunQuery(source,sql)
     return "OK"
 
 @app.route("/getHistory/<int:history_id>")
