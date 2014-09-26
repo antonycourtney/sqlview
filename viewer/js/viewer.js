@@ -64,7 +64,8 @@ var logViewer = React.renderComponent(
     document.getElementById("content")
 );
 
-var historyUrl = "/getHistory";
+var historyId = 0;
+var historyUrl = "/getHistory/" + historyId;
 var hp = Q($.ajax({
     url: historyUrl,
     type: "GET"
@@ -74,7 +75,8 @@ hp.then(function (data) {
     console.log("Got history: ", data);
     console.log("logViewer: ", logViewer );
     logViewer.setState({ queryLog: data.history } );
-    console.log("Set state on log viewer...");    
+    console.log("Set state on log viewer...");
+    window.scrollTo(0,document.body.scrollHeight);    
 }).catch(function (e) {
     console.error("caught unhandled promise exception: ", e.stack, e);
 });

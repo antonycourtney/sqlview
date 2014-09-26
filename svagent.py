@@ -56,9 +56,11 @@ def runsql():
     runQuery(sql)
     return "OK"
 
-@app.route("/getHistory")
-def getHistory():
-    return jsonify(history=queryLog)
+@app.route("/getHistory/<int:history_id>")
+def getHistory(history_id):
+    # return all history starting from history_id
+    logSuffix=queryLog[history_id:]
+    return jsonify(history=logSuffix)
 
 @app.route('/viewer/<path:filename>')
 def send_public(filename):
