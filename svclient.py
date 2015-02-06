@@ -20,7 +20,14 @@ def send_query(query):
 query = "select count(*) from messages"
 if len(sys.argv) > 1:
     filename = sys.argv[1]
-    if os.path.exists(filename):
+    if filename=='-':
+        query=sys.stdin.read()
+    elif os.path.exists(filename):
         with open(filename,'r') as f:
             query = f.read()
-send_query(query)
+query = query.strip()
+if len(query) > 0:
+    print "sending query: ", query
+    send_query(query)
+else:
+    print "(empty query, skipping)"

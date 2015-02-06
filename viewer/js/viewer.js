@@ -31,7 +31,7 @@ var QueryLogViewer = React.createClass(
             var gridData = entry.result.data;        
             ret= (<div>
                         <p>
-                        Rows Returned: {gridData.length}
+                        Rows Returned: {gridData.length} (LIMIT: 5000)
                         </p>
                         <DataGrid columnNames={columnNames} data={gridData} options={gridOptions} />                
                    </div>);

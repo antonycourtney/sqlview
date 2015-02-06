@@ -23,6 +23,11 @@ class CustomJSONEncoder(JSONEncoder):
             if isinstance(obj, datetime.date):
                 ret = obj.strftime("%d %b %Y")
                 return ret
+            elif isinstance(obj, datetime.timedelta):
+                ts = obj.total_seconds()
+                print "Got total seconds: ", ts
+                ret = str(ts)
+                return ret                
             iterable = iter(obj)
         except TypeError:
             pass
@@ -55,7 +60,6 @@ queryLog = []
 
 def runQuery(source,query):
     global dbConn
-    print "dbConn: ", dbConn
     if dbConn==None:
         print "Connecting to database:"
         dbConn = psycopg2.connect(host="my-redshift.ch3bwpy21rao.us-west-2.redshift.amazonaws.com",
@@ -65,7 +69,8 @@ def runQuery(source,query):
     print "Executing query: ", query
     entry = { 'source': source, 'query': query, 'result': []}
     try:
-        cursor.execute(query)
+        wrappedQuery = "select * from ( " + query + " ) limit 5000"
+        cursor.execute(wrappedQuery)
         desc = cursor.description
         print "description: ", desc
         cnames = []
@@ -95,7 +100,7 @@ def runsql():
     print "got query request"
     print "request form data: ", request.form
     sql = request.form['query']
-    source = request.form['source']
+    source = request.form.get('source','')
     print "got query: ", sql
     runQuery(source,sql)
     return "OK"
