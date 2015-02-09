@@ -12,4 +12,53 @@ The project is broken in to three components:
 
 # Installation and Getting Started
 
+These are quick-start instructions for using sqlview with the Analytics Inbox (ai) Project
+
+
+
+### Clone This Repository
+
+    $ git clone https://github.com/antonycourtney/sqlview.git
+
+### Build the JavaScript Viewer
+
+Install npm dependencies, run gulp:
+
+    $ cd sqlview/viewer
+    $ npm install
+    $ gulp
+
+And pop back up to the sqlview directory:
+
+    $ cd ..
+
+
+### Source the Glen Mistro env vars
+
+You need this to connect to Redshift.  Skip if you already do this in your `.profile` or equivalent.
+
+  $ . ~/glenmistro/env_vars.sh
+
+### Run the agent
+
+  $ python svagent.py
+
+### Connect to the viewer from a web browser:
+
+In your web browser open the URL http://localhost:5000/viewer/viewer.html
+
+### Run an ai query:
+
+In the `ai/analytics_db` dir, hack `tq.sh` to have the path to your `sqlview` directory, and then run:
+
+  $ ./tq.sh -u 1 allCorrespondents
+
+If all went well, you should see the query and a grid with the query result in your browser window.
+
+( And yes, I should fix the absolute path in that shell script...)
+
+### Optional : Install Sublime Text Plugin
+
+( I would skip this for now...this is from when I was writing queries directly in a file with just SQL, before setting up inbox_queries.js ).
+
 To install the Sublime Text plugin, copy or link RunSqlPlugin.py in to the Sublime Text plugins directory.  For me, this is ~//Library/Application Support/Sublime Text 3/Packages/User.

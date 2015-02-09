@@ -43,6 +43,54 @@ app.json_encoder = CustomJSONEncoder
 
 PASSFILE = "~/.awspass"
 
+class DbParams:
+    REDSHIFT_PASSFILE = "~/.awspass"
+    def __init__(self):
+        self.redshiftParams = None
+
+    #
+    # Redshift Parameters
+    # Figure out the default userid / password for AWS Redshift
+    #
+    def getRedshiftParameters(self):
+
+        if self.redshiftParams != None:
+            return self.redshiftParams
+
+        # Initialize the hash
+        self.redshiftParams = {
+            'username' : None,
+            'password' : None,
+            'redshiftInstance' : None,
+            'redshiftPort' : '5439',
+            'redshiftDB' : None
+            }
+
+        passpath = os.path.expanduser(self.REDSHIFT_PASSFILE)
+        if ('AWS_REDSHIFT_USER' in os.environ) and ('AWS_REDSHIFT_PWD' in os.environ):
+            print "Read AWS Redshift parameters from environment vars"
+            self.redshiftParams['username']         = os.environ['AWS_REDSHIFT_USER']
+            self.redshiftParams['password']         = os.environ['AWS_REDSHIFT_PWD']
+            self.redshiftParams['redshiftInstance'] = os.environ['AWS_REDSHIFT_INSTANCE']
+            self.redshiftParams['redshiftPort']     = os.environ['AWS_REDSHIFT_PORT']
+            self.redshiftParams['redshiftDB']       = os.environ['AWS_REDSHIFT_DB']
+        elif os.path.exists(passpath):
+            with open(passpath,'r') as f:
+                line = f.readline()
+                password = line.strip()
+                print "Read AWS Redshift parameters from: [", self.REDSHIFT_PASSFILE, "]"
+                self.redshiftParams['username']         = "awsuser"
+                self.redshiftParams['password']         = password
+                self.redshiftParams['redshiftInstance'] = None
+                self.redshiftParams['redshiftPort']     = '5439'
+                self.redshiftParams['redshiftDB']       = 'mydb'
+        else:
+            print "No .awspass and no AWS_REDSHIFT_USER env var. Perhaps need ../env_vars.sh?"
+
+        print "Redshift parameters: username [", self.redshiftParams['username'], "] instance [", self.redshiftParams['redshiftInstance'], "]"
+        return self.redshiftParams
+
+
 def getPass():
     passpath = os.path.expanduser(PASSFILE)
     if os.path.exists(passpath):
@@ -54,7 +102,8 @@ def getPass():
         password = getpass.getpass("AWS password: ")
     return password
 
-awspassword=getPass()
+# awspassword=getPass()
+dbParams = DbParams()
 
 dbConn = None
 
@@ -65,8 +114,15 @@ def runQuery(source,query):
     global dbConn
     if dbConn==None:
         print "Connecting to database:"
-        dbConn = psycopg2.connect(host="my-redshift.ch3bwpy21rao.us-west-2.redshift.amazonaws.com",
-                                    database="mydb",port="5439",user="awsuser",password=awspassword)
+        redshiftParams  = dbParams.getRedshiftParameters()
+        print "got redshift params: ", redshiftParams
+        # dbConn = psycopg2.connect(host="my-redshift.ch3bwpy21rao.us-west-2.redshift.amazonaws.com",
+        #                             database="mydb",port="5439",user="awsuser",password=awspassword)
+        dbConn = psycopg2.connect(host=redshiftParams['redshiftInstance'],
+                                database=redshiftParams['redshiftDB'],
+                                port=redshiftParams['redshiftPort'],
+                                user=redshiftParams['username'],
+                                password=redshiftParams['password'])
         print "Connected."
     cursor = dbConn.cursor()
     print "Executing query: ", query
