@@ -15,12 +15,15 @@ import datetime
 import traceback
 
 #
-# A custom JSONEncoder to encode date (not datetime) values reasonably:
+# A custom JSONEncoder to encode date and datetime values reasonably:
 #
 class CustomJSONEncoder(JSONEncoder):
     def default(self, obj):
         try:
-            if isinstance(obj, datetime.date):
+            if isinstance(obj, datetime.datetime):
+                ret = obj.strftime("%c")
+                return ret
+            elif isinstance(obj, datetime.date):
                 ret = obj.strftime("%d %b %Y")
                 return ret
             elif isinstance(obj, datetime.timedelta):
@@ -81,7 +84,7 @@ def runQuery(source,query):
             rows = cursor.fetchall()
         except psycopg2.ProgrammingError:
             rows = []
-        # print "===> ", rows
+        print "===> ", rows
         entry['status'] = True
         entry['result'] = { 'columnNames': cnames, 'data': rows }
     except:
