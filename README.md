@@ -37,11 +37,11 @@ And pop back up to the sqlview directory:
 
 You need this to connect to Redshift.  Skip if you already do this in your `.profile` or equivalent.
 
-  $ . ~/glenmistro/env_vars.sh
+    $ . ~/glenmistro/env_vars.sh
 
 ### Run the agent
 
-  $ python svagent.py
+    $ python svagent.py
 
 ### Connect to the viewer from a web browser:
 
@@ -51,7 +51,7 @@ In your web browser open the URL http://localhost:5000/viewer/viewer.html
 
 In the `ai/analytics_db` dir, hack `tq.sh` to have the path to your `sqlview` directory, and then run:
 
-  $ ./tq.sh -u 1 allCorrespondents
+    $ ./tq.sh -u 1 allCorrespondents
 
 If all went well, you should see the query and a grid with the query result in your browser window.
 
